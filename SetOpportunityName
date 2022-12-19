@@ -1,0 +1,85 @@
+/* SetOpportunityName
+ * Takes pre-determined fields and creates a Opportunity name
+ * Author:	Ozlem Kutluel
+ * Version:	1.0
+ */
+ 
+/* Variables to store necessary information */
+companyName = "";
+country = "";
+tradeChannel = "";
+pilotProject = "";
+year = "";
+duration = "";
+updateString = "";
+
+/* Map containing the shortened equivelants of the trade channels */
+tradeChannelMap = {"Duty Free":"DF","E-Commerce":"E-COM","Modern Trade":"MT","Multi-Channel":"MC","On-premise":"OP","Perfumery":"OTC","Pharmacy":"OTC","OTC":"OTC","Traditional Trade":"TT"};
+
+/* Pulls all information regarding the Opportunity */
+recordInfo = zoho.crm.getRecordById("Deals",opportunityID);
+
+/* Pull company name, check for existence, add to name string */
+companyName = recordInfo.getJSON("Account_Name").getJSON("name");
+if(companyName != null)
+{
+	companyName = companyName.replaceAll(" ","");
+	updateString = updateString.concat(companyName + "_");
+	info companyName;
+}
+
+/* Pull country, check for existence, add to name string */
+country = recordInfo.getJSON("Country_Multi_Select");
+if(country != null)
+{
+	country = country.replaceAll(" ","");
+	updateString = updateString.concat(country + "_");
+	info country;
+}
+
+/* Pull trade channel, find its map equivelant, check for existence, add to name string */
+tradeChannel = recordInfo.getJSON("Trade_Channel");
+if(tradeChannel != null && tradeChannel != "N/A")
+{
+	tradeChannel = tradeChannelMap.get(tradeChannel);
+	updateString = updateString.concat(tradeChannel + "_");
+	info tradeChannel;
+}
+
+/* Pull Project Type, check for existence, add to name string */
+pilotProject = recordInfo.getJSON("Project_Type");
+if(pilotProject != null)
+{
+	pilotProject = pilotProject.replaceAll(" ","");
+	updateString = updateString.concat(pilotProject + "_");
+	info pilotProject;
+}
+
+/* Pull year, check for existence, add to name string */
+year = recordInfo.getJSON("Setup_Start_Date");
+if(year != null)
+{
+	year = year.replaceAll(" ","");
+	yearList = year.toList("-");
+	year = yearList.get(0);
+	updateString = updateString.concat(year + "_");
+	info year;
+}
+
+/* Pull duration, check for existence, add to name string */
+duration = recordInfo.getJSON("pduration_months");
+if(duration != null)
+{
+	duration = duration.concat("M");
+	updateString = updateString.concat(duration + "_");
+	info duration;
+}
+
+/* Remove the last '_' in the name string */
+updateString = updateString.removeLastOccurence("_");
+
+/* Place update string in an update map */
+updateMap = {"Deal_Name":updateString};
+
+/* Update opportunity name */
+zoho.crm.updateRecord("Deals",opportunityID,updateMap);
